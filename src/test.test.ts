@@ -1,11 +1,36 @@
 import Language from "./language";
+import { SqliteProvider } from "./storage/provider/sqlite_provider";
+import { StorageOptions } from "./storage/storage_option";
+import StorageProvider from "./storage/storage_provider";
 import Translations from "./translations";
 
-export default class Test {
+test("clear", () => {
+    const storageProvider = new SqliteProvider<string>(new StorageOptions("test", "translations", false));
+    storageProvider.start();
+    storageProvider.clear();
+    storageProvider.stop();
+});
 
-    public test() {
-        const translations = new Translations(Language.DE);
-        expect(translations.get("test.test")).toBe("test.test");
-    }
+test("read 404", () => {
+    const storageProvider = new SqliteProvider<string>(new StorageOptions("test", "translations", false));
+    storageProvider.start();
+    const translations = new Translations(Language.DE, storageProvider);
+    expect(translations.get("test.test")).toBe("test.test - 404");
+    storageProvider.stop();
+});
 
-}
+test("write", () => {
+    const storageProvider = new SqliteProvider<string>(new StorageOptions("test", "translations", false));
+    storageProvider.start();
+    const translations = new Translations(Language.DE, storageProvider);
+    expect(translations.set("test.test", "TEST")).toBe(true);
+    storageProvider.stop();
+});
+
+test("read write", () => {
+    const storageProvider = new SqliteProvider<string>(new StorageOptions("test", "translations", false));
+    storageProvider.start();
+    const translations = new Translations(Language.DE, storageProvider);
+    expect(translations.get("test.test")).toBe("TEST");
+    storageProvider.stop();
+});

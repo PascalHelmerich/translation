@@ -1,41 +1,27 @@
 import Language from './language';
-import LanguageData from './language_data';
+import StorageProvider from './storage/storage_provider';
 
 export default class Translations {
   defaultLanguage: Language;
 
-  languageCache: Map<Language, LanguageData> = new Map();
+  storage: StorageProvider<string>;
 
-  public constructor(defaultLanguage: Language = Language.US) {
+  public constructor(defaultLanguage: Language, storage: StorageProvider<string>) {
     this.defaultLanguage = defaultLanguage;
+    this.storage = storage;
   }
 
-  public set(key: string, value: string, language: Language = this.defaultLanguage) {
-    this.getLanguageFromCache(language).set(key, value)
+  public set(key: string, value: string): boolean {
+    return this.storage.write(key, value);
   }
 
 
-  public get(key: string, language: Language = this.defaultLanguage) {
-    return this.getFromCache(key, language);
-  }
+  public get(key: string): string {
+    const value = this.storage.read(key);
 
-  public warmup(languages: Language[]) {
-    languages.forEach(language => { this.loadLanguage(language) });
-  }
-
-  private loadLanguage(language: Language) {
-    this.getFromCache("", language);
-  }
-
-  private getLanguageFromCache(language: Language): LanguageData {
-    const languageDate = this.languageCache.get(language) ?? new LanguageData(language);
-    if (!this.languageCache.has(language)) {
-      this.languageCache.set(language, new LanguageData(language));
+    if (value === undefined) {
+      return key + " - 404";
     }
-    return languageDate;
-  }
-
-  private getFromCache(key: string, language: Language = this.defaultLanguage): string {
-    return this.getLanguageFromCache(language).get(key);
+    return value;
   }
 }
