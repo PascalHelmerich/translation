@@ -4,7 +4,7 @@ export default abstract class StorageProvider<T> {
     
     private storageOptions;
 
-    public constructor(options: StorageOptions) {
+    constructor(options: StorageOptions) {
         this.storageOptions = options;
     }
 
@@ -18,6 +18,7 @@ export default abstract class StorageProvider<T> {
 
     abstract write(key: string, value: T): boolean;
 
-    abstract stop(): void;
+    abstract clear(): void;
 
+    abstract stop(): void;
 }
